@@ -1,4 +1,4 @@
-$(document).ready(function() {
+function init() {
     var ctl = new Leap.Controller({enableGestures: true});
 
     var swiper = ctl.gesture('swipe');
@@ -33,4 +33,4 @@ $(document).ready(function() {
 
     ctl.connect();
     updateHighlight();
-  })
+  }
