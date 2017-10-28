@@ -34,3 +34,7 @@ function init() {
     ctl.connect();
     updateHighlight();
   }
+
+  function loadAssets() {
+    
+  }
