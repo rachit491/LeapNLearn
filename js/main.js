@@ -1,6 +1,8 @@
 // Store frame for motion functions
 var previousFrame = null;
 var paused = false;
+var pauseOnGesture = false;
+
 
 // Setup Leap loop with frame callback function
 var controllerOptions = {};
@@ -98,9 +100,84 @@ Leap.loop(controllerOptions, function(frame) {
   }
   pointableOutput.innerHTML = pointableString;
 
-  // Store frame for motion functions
-  previousFrame = frame;
+ 
+
+
+// Display Gesture object data
+var gestureOutput = document.getElementById("gestureData");
+var gestureString = "";
+if (frame.gestures.length > 0) {
+  if (pauseOnGesture) {
+    togglePause();
+  }
+  for (var i = 0; i < frame.gestures.length; i++) {
+    var gesture = frame.gestures[i];
+    gestureString += "Gesture ID: " + gesture.id + ", "
+                  + "type: " + gesture.type + ", "
+                  + "state: " + gesture.state + ", "
+                  + "hand IDs: " + gesture.handIds.join(", ") + ", "
+                  + "pointable IDs: " + gesture.pointableIds.join(", ") + ", "
+                  + "duration: " + gesture.duration + " &micro;s, ";
+
+    switch (gesture.type) {
+      case "circle":
+        gestureString += "center: " + vectorToString(gesture.center) + " mm, "
+                      + "normal: " + vectorToString(gesture.normal, 2) + ", "
+                      + "radius: " + gesture.radius.toFixed(1) + " mm, "
+                      + "progress: " + gesture.progress.toFixed(2) + " rotations";
+        break;
+      case "swipe":
+        gestureString += "start position: " + vectorToString(gesture.startPosition) + " mm, "
+                      + "current position: " + vectorToString(gesture.position) + " mm, "
+                      + "direction: " + vectorToString(gesture.direction, 1) + ", "
+                      + "speed: " + gesture.speed.toFixed(1) + " mm/s";
+        break;
+      case "screenTap":
+      case "keyTap":
+        gestureString += "position: " + vectorToString(gesture.position) + " mm";
+        break;
+      default:
+        gestureString += "unkown gesture type";
+    }
+    gestureString += "<br />";
+  }
+}
+else {
+  gestureString += "No gestures";
+}
+gestureOutput.innerHTML = gestureString;
+
+ // Store frame for motion functions
+ previousFrame = frame;
 })
+
+
+function vectorToString(vector, digits) {
+if (typeof digits === "undefined") {
+  digits = 1;
+}
+return "(" + vector[0].toFixed(digits) + ", "
+           + vector[1].toFixed(digits) + ", "
+           + vector[2].toFixed(digits) + ")";
+}
+
+function togglePause() {
+paused = !paused;
+
+if (paused) {
+  document.getElementById("pause").innerText = "Resume";
+} else {
+  document.getElementById("pause").innerText = "Pause";
+}
+}
+
+function pauseForGestures() {
+if (document.getElementById("pauseOnGesture").checked) {
+  pauseOnGesture = true;
+} else {
+  pauseOnGesture = false;
+}
+}
 
 function vectorToString(vector, digits) {
   if (typeof digits === "undefined") {
