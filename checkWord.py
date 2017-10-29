@@ -17,7 +17,7 @@ app = Flask(__name__)
 @app.route('/_check')
 def check():
     wordlist = request.args.get('wordlist')
-    print(wordlist)
+    #print(wordlist)
     return jsonify(result=main(wordlist))
 
 @app.route('/')
@@ -52,27 +52,34 @@ def BingWebSearch(search):
 
 def updatePoints(flag):
     global points
-    global ctr
     if flag:
-        ctr=ctr+1
-        points+=(ctr*5)
+        points+=5
         print("Total Points: {}\n".format(points))
     return points
 
-def checkValidWord(string):
-	d = enchant.Dict("en_US")
-	return (d.check(string))
+def checkValidWord(s):
+    d = enchant.Dict("en_US")
+    return (d.check(s.lower()))
 
 def main(wordlist):
     #testWords = ["processing","exclaim","buisness","cofffeee"]
     #testWords = json.loads(params)
+    global ctr
+    ctr = 0
     point = 0
     testWords = wordlist.split(",")
+    print(testWords)
     for i in range(len(testWords)):
-        if checkValidWord(testWords[i]):
-            #headers,result = BingWebSearch(testWords[i])
-            print(testWords[i])
-            point += updatePoints(checkValidWord(testWords[i]))
+        str = testWords[i].replace('"','')
+        str = str.replace("[",'')
+        str = str.replace("]",'')
+        if len(str) > 2:
+            ctr = ctr+1
+            dec = checkValidWord(str)
+            print("String is {} and Result is {}".format(str, dec))
+            point += (ctr*updatePoints(dec))
+        else:
+            continue
     return point
 
 if __name__ == "__main__":
