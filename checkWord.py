@@ -2,6 +2,7 @@ import enchant
 import httplib, json
 from six.moves.urllib.parse import urlparse
 import urllib
+from flask import Flask, request, jsonify, render_template
 import json
 
 ctr = 0
@@ -10,6 +11,18 @@ subscriptionKey = "1b7f6770631348f8b0b87724a4b62fca" #  Microsoft Cognitive API 
 host = "api.cognitive.microsoft.com"
 path = "/bing/v7.0/search"
 term = "Microsoft Cognitive Services"
+
+app = Flask(__name__)
+
+@app.route('/_check')
+def check():
+    wordlist = request.args.get('wordlist')
+    print(wordlist)
+    return jsonify(result=main(wordlist))
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 def BingWebSearch(search):
     "Performs a Bing Web search and returns the results."
@@ -44,20 +57,23 @@ def updatePoints(flag):
         ctr=ctr+1
         points+=(ctr*5)
         print("Total Points: {}\n".format(points))
+    return points
 
 def checkValidWord(string):
 	d = enchant.Dict("en_US")
 	return (d.check(string))
 
-def main():
-    testWords = ["processing","exclaim","buisness","cofffeee"]
+def main(wordlist):
+    #testWords = ["processing","exclaim","buisness","cofffeee"]
     #testWords = json.loads(params)
-    #testWords = data['params']
+    point = 0
+    testWords = wordlist.split(",")
     for i in range(len(testWords)):
         if checkValidWord(testWords[i]):
             #headers,result = BingWebSearch(testWords[i])
             print(testWords[i])
-            updatePoints(checkValidWord(testWords[i]))
+            point += updatePoints(checkValidWord(testWords[i]))
+    return point
 
 if __name__ == "__main__":
-    main()
+    app.run()

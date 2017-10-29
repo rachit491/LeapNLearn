@@ -7,6 +7,7 @@ var x = 2, y = 2;
 var paths;
 var wordSet = new Set();
 var score = 0;
+
 function init() {
   var ctl = new Leap.Controller({enableGestures: true});
 
@@ -71,14 +72,20 @@ function pyCall(){
     wordSet.add(paths[i]);
   }
   var json_string = JSON.stringify(params);
-  $.ajax({
+  /*$.ajax({
     type: "POST",
     url: "python/checkWord.py",
     data: { param: json_string}
   }).done(function( o ) {
      score = o;
      document.getElementById("insert").innerHTML = score;
-  });
+  });*/
+  $.getJSON($SCRIPT_ROOT + '/_check', {
+        wordlist: JSON.stringify(params)
+    }, function(data){
+        console.log(data.result)
+        //$( "#result" ).text(data.result);
+    });
 }
 
 
