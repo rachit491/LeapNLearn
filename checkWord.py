@@ -25,6 +25,33 @@ def check():
 def index():
     return render_template('index.html')
 
+def EntitySearchAPI(str):
+    #python  3.2 #############
+    import http.client,  urllib.request, urllib.parse, urllib.error, base64
+    headers = {
+    # Request headers
+        'Ocp-Apim-Subscription-Key': '973fcb01ae7642c487b5490af38e0f5e',
+    }
+    params = urllib.parse.urlencode({
+    # Request parameters
+        'q': '{'+str+'}',
+        'mkt': 'en-us',
+        'count': '10',
+        'offset': '0',
+       'safesearch': 'Moderate',
+    })
+    try:
+        conn = http.client.HTTPSConnection('api.cognitive.microsoft.com')
+        conn.request("GET", "/bing/v7.0/entities/?%s" % params, "{body}", headers)
+        response = conn.getresponse()
+        data = response.read()
+        d = str(data).split("description")[len(str(data).split("description"))-1].split('\"')[2]
+        print(d)
+        conn.close()
+    except Exception as e:
+        print("[Errno {0}] {1}".format(e.errno, e.strerror))
+####################################
+
 def BingWebSearch(search):
     "Performs a Bing Web search and returns the results."
     global subscriptionKey
@@ -78,11 +105,14 @@ def main(wordlist):
             dec = checkValidWord(str)
             print("String is {} and Result is {}".format(str, dec))
             if dec:
-                words.append(str)
+                words.append(str+':')
+                meaning = EntitySearchAPI(str)
+                meaning = meaning + ":\n"
+                words.append(meaning)
             point = updatePoints(dec)
         else:
             continue
-    print("Kundu {}".format(point))
+   # print("Kundu {}".format(point))
     words.append(point)
     print(words)
     return words
