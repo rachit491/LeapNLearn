@@ -55,7 +55,7 @@
 
 	  var totalDistance = 0;
 
-	  var tolerance = 50;
+	  var tolerance = 80;
 	  var cooloff = 300;
 
 
@@ -130,7 +130,9 @@
 	  $.getJSON($SCRIPT_ROOT + '/_check', {
 	        wordlist: JSON.stringify(params)
 	    }, function(data){
-	        console.log(data.result)
+	    		console.log(data.result);
+	        	score = data.result;
+	        document.getElementById("insert").innerHTML = score;
 	        //$( "#result" ).text(data.result);
 	    });
 	}

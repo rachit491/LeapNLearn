@@ -7,6 +7,7 @@ import json
 
 ctr = 0
 points = 0
+point = 0
 subscriptionKey = "1b7f6770631348f8b0b87724a4b62fca" #  Microsoft Cognitive API key 
 host = "api.cognitive.microsoft.com"
 path = "/bing/v7.0/search"
@@ -66,7 +67,7 @@ def main(wordlist):
     #testWords = json.loads(params)
     global ctr
     ctr = 0
-    point = 0
+    words = [];
     testWords = wordlist.split(",")
     print(testWords)
     for i in range(len(testWords)):
@@ -76,11 +77,15 @@ def main(wordlist):
         if len(str) > 2:
             dec = checkValidWord(str)
             print("String is {} and Result is {}".format(str, dec))
+            if dec:
+                words.append(str)
             point = updatePoints(dec)
         else:
             continue
     print("Kundu {}".format(point))
-    return point
+    words.append(point)
+    print(words)
+    return words
 
 if __name__ == "__main__":
     app.run()
