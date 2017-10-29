@@ -2,7 +2,9 @@ import enchant
 import httplib, json
 from six.moves.urllib.parse import urlparse
 import urllib
+import json
 
+ctr = 0
 points = 0
 subscriptionKey = "1b7f6770631348f8b0b87724a4b62fca" #  Microsoft Cognitive API key 
 host = "api.cognitive.microsoft.com"
@@ -37,8 +39,10 @@ def BingWebSearch(search):
 
 def updatePoints(flag):
     global points
+    global ctr
     if flag:
-        points+=5
+        ctr=ctr+1
+        points+=(ctr*5)
         print("Total Points: {}\n".format(points))
 
 def checkValidWord(string):
@@ -47,9 +51,12 @@ def checkValidWord(string):
 
 def main():
     testWords = ["processing","exclaim","buisness","cofffeee"]
+    #testWords = json.loads(params)
+    #testWords = data['params']
     for i in range(len(testWords)):
         if checkValidWord(testWords[i]):
             #headers,result = BingWebSearch(testWords[i])
+            print(testWords[i])
             updatePoints(checkValidWord(testWords[i]))
 
 if __name__ == "__main__":
