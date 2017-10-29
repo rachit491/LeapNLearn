@@ -30,6 +30,7 @@ function init() {
     if (Math.abs(g.translation()[0]) > tolerance || Math.abs(g.translation()[1]) > tolerance) {
       var xDir = Math.abs(g.translation()[0]) > tolerance ? (g.translation()[0] > 0 ? -1 : 1) : 0;
       var yDir = Math.abs(g.translation()[1]) > tolerance ? (g.translation()[1] < 0 ? -1 : 1) : 0;
+
       slider(xDir, yDir);
     }
   });
@@ -39,6 +40,9 @@ function init() {
 
   createImageMap();
   loadAssets();
+  var paths = searchWord(matrix);
+  for(var i = 0;i<paths.length;i++)
+    console.log(paths[i]);
 }
 
 function getWeight(char) {
@@ -107,7 +111,7 @@ function loadAssets() {
     for(var j=0; j<5; j++) {
       num = getRandomLetters();
       var elm = document.getElementById("d"+j+"_"+i);
-      elm.style.backgroundImage = "url('../assets/text.jpg')";
+      elm.style.backgroundImage = "url('../assets/text-gray.jpg')";
       elm.style.backgroundRepeat = "no-repeat";
       elm.style.backgroundPositionX = imagePosMap[num].x + "px";//"-20px";     //-140px to move left
       elm.style.backgroundPositionY = imagePosMap[num].y + "px";//"-14px";     //-115px to move down
