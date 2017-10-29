@@ -2,6 +2,5 @@
 
 How to run it - 
 
-export FLASK_APP=checkWord.py
-
-python -m flask run
+1. export FLASK_APP=checkWord.py
+2. python -m flask run
