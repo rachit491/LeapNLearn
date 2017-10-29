@@ -74,12 +74,12 @@ def main(wordlist):
         str = str.replace("[",'')
         str = str.replace("]",'')
         if len(str) > 2:
-            ctr = ctr+1
             dec = checkValidWord(str)
             print("String is {} and Result is {}".format(str, dec))
-            point += (ctr*updatePoints(dec))
+            point = updatePoints(dec)
         else:
             continue
+    print("Kundu {}".format(point))
     return point
 
 if __name__ == "__main__":
