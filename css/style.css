@@ -1,0 +1,17 @@
+.highlight {
+  border: 5px red solid !important;
+}
+
+#slide {
+  background-color:white;
+  float: left;
+  width: 100%;
+  height: 100%;
+}
+
+.grid div {
+  width: 100px;
+  height: 100px;
+  float: left;
+  border: 5px black solid;
+}
