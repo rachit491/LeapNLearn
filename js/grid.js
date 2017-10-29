@@ -66,7 +66,7 @@ function pyCall(){
   var params = new Array();
    for(i=0;i<paths.length;i++){
     if(!wordSet.has(paths[i]))
-      params.add(paths[i]);
+      params.push(paths[i]);
     wordSet.add(paths[i]);
   }
   var json_string = JSON.stringify(params);
