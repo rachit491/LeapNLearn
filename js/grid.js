@@ -33,15 +33,17 @@ function init() {
     if (Math.abs(g.translation()[0]) > tolerance || Math.abs(g.translation()[1]) > tolerance) {
       var xDir = Math.abs(g.translation()[0]) > tolerance ? (g.translation()[0] > 0 ? -1 : 1) : 0;
       var yDir = Math.abs(g.translation()[1]) > tolerance ? (g.translation()[1] < 0 ? -1 : 1) : 0;
-      var temp = matrix[x][y];
+     
       prevX = x;
       prevY = y;
-      matrix[x][y] = matrix[x+xDir][y+yDir];
-      matrix[x+xDir][y+yDir] = temp;
-
-      temp = numMatrix[x][y];
-      numMatrix[x][y] = numMatrix[x+xDir][y+yDir];
-      numMatrix[x+xDir][y+yDir] = temp; 
+      var temp = matrix[y][x];
+      matrix[y][x] = matrix[(y+5+yDir)%5][(x+xDir+5)%5];
+      matrix[(y+5+yDir)%5][(x+xDir+5)%5] = temp; 
+      console.log("prev" +numMatrix);
+      temp = numMatrix[y][x];
+      numMatrix[y][x] = numMatrix[(y+5+yDir)%5][(x+xDir+5)%5];
+      numMatrix[(y+5+yDir)%5][(x+xDir+5)%5] = temp; 
+      console.log("next"+numMatrix);
       slider(xDir, yDir);
     }
   });
@@ -59,16 +61,13 @@ function init() {
 function reRender(){
   var elm = document.getElementById("d"+x+"_"+y);
   var elm1 = document.getElementById("d"+prevX+"_"+prevY);
-  elm.style.backgroundPositionX = imagePosMap[numMatrix[x][y]].x + "px";//"-20px";     //-140px to move left
-  elm.style.backgroundPositionY = imagePosMap[numMatrix[x][y]].y + "px";//"-14px";     //-115px to move down
-  elm1.style.backgroundPositionX = imagePosMap[numMatrix[prevX][prevY]].x + "px";//"-20px";     //-140px to move left
-  elm1.style.backgroundPositionY = imagePosMap[numMatrix[prevX][prevY]].y + "px";//"-14px";     //-115px to move down
-  elm1.setAttribute("data-value", imagePosMap[numMatrix[prevX][prevY]].value);
-  console.log(imagePosMap[numMatrix[prevX][prevY]].value)
-  elm.setAttribute("data-value", imagePosMap[numMatrix[x][y]].value);
-  console.log(imagePosMap[numMatrix[x][y]].value);
- 
-}
+  elm.style.backgroundPositionX = imagePosMap[numMatrix[y][x]].x + "px";//"-20px";     //-140px to move left
+  elm.style.backgroundPositionY = imagePosMap[numMatrix[y][x]].y + "px";//"-14px";     //-115px to move down
+  elm1.style.backgroundPositionX = imagePosMap[numMatrix[prevY][prevX]].x + "px";//"-20px";     //-140px to move left
+  elm1.style.backgroundPositionY = imagePosMap[numMatrix[prevY][prevX]].y + "px";//"-14px";     //-115px to move down
+  elm1.setAttribute("data-value", imagePosMap[numMatrix[prevY][prevX]].value);
+  elm.setAttribute("data-value", imagePosMap[numMatrix[y][x]].value);
+ }
 
 function getWeight(char) {
   switch(char) {
