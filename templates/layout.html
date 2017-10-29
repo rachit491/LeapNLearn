@@ -2,6 +2,8 @@
 <title>LeapNLearn</title>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
 <script src="http://js.leapmotion.com/leap-0.6.3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.3/require.min.js"></script>
+<script src="https://rachit491.github.io/speech.browser.sdk.js"></script>
 <style type="text/css">
 	.highlight {
 	  border: 5px red solid !important;
@@ -27,6 +29,153 @@
   var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 </script>
 <script type="text/javascript">
+	/*
+	 * Microsoft Bing Speech to Text API
+	 */
+	var key = {value: "969e5b575781433abeca615365fd3926"};
+	// On document load resolve the SDK dependency
+    function Initialize(onComplete) {
+        require(["Speech.Browser.Sdk"], function(SDK) {
+            onComplete(SDK);
+            init();
+        });
+    }
+    
+    // Setup the recognizer
+    function RecognizerSetup(SDK, recognitionMode, language, format, subscriptionKey) {
+        
+        switch (recognitionMode) {
+            case "Interactive" :
+                recognitionMode = SDK.RecognitionMode.Interactive;    
+                break;
+            case "Conversation" :
+                recognitionMode = SDK.RecognitionMode.Conversation;    
+                break;
+            case "Dictation" :
+                recognitionMode = SDK.RecognitionMode.Dictation;    
+                break;
+            default:
+                recognitionMode = SDK.RecognitionMode.Interactive;
+        }
+
+        var recognizerConfig = new SDK.RecognizerConfig(
+            new SDK.SpeechConfig(
+                new SDK.Context(
+                    new SDK.OS(navigator.userAgent, "Browser", null),
+                    new SDK.Device("SpeechSample", "SpeechSample", "1.0.00000"))),
+            recognitionMode,
+            language, // Supported languages are specific to each recognition mode. Refer to docs.
+            format); // SDK.SpeechResultFormat.Simple (Options - Simple/Detailed)
+
+        // Alternatively use SDK.CognitiveTokenAuthentication(fetchCallback, fetchOnExpiryCallback) for token auth
+        var authentication = new SDK.CognitiveSubscriptionKeyAuthentication(subscriptionKey);
+
+        return SDK.CreateRecognizer(recognizerConfig, authentication);
+    }
+
+    // Start the recognition
+    function RecognizerStart(SDK, recognizer) {
+        recognizer.Recognize((event) => {
+            /*
+             Alternative syntax for typescript devs.
+             if (event instanceof SDK.RecognitionTriggeredEvent)
+            */
+            switch (event.Name) {
+                case "RecognitionTriggeredEvent" :
+                    break;
+                case "ListeningStartedEvent" :
+                    break;
+                case "RecognitionStartedEvent" :
+                    break;
+                case "SpeechStartDetectedEvent" :
+                    console.log(JSON.stringify(event.Result)); // check console for other information in result
+                    break;
+                case "SpeechHypothesisEvent" :
+                    UpdateRecognizedHypothesis(event.Result.Text, false);
+                    //console.log(JSON.stringify(event.Result)); // check console for other information in result
+                    break;
+                case "SpeechFragmentEvent" :
+                    UpdateRecognizedHypothesis(event.Result.Text, true);
+                    //console.log(JSON.stringify(event.Result)); // check console for other information in result
+                    break;
+                case "SpeechEndDetectedEvent" :
+                    OnSpeechEndDetected();
+                    //console.log(JSON.stringify(event.Result)); // check console for other information in result
+                    break;
+                case "SpeechSimplePhraseEvent" :
+                    UpdateRecognizedPhrase(JSON.stringify(event.Result, null, 3));
+                    break;
+                case "SpeechDetailedPhraseEvent" :
+                    UpdateRecognizedPhrase(JSON.stringify(event.Result, null, 3));
+                    break;
+                case "RecognitionEndedEvent" :
+                    OnComplete();
+                    //console.log(JSON.stringify(event)); // Debug information
+                    break;
+                default:
+                    console.log(JSON.stringify(event)); // Debug information
+            }
+        })
+        .On(() => {
+            // The request succeeded. Nothing to do here.
+        },
+        (error) => {
+            console.error(error);
+        });
+    }
+
+    // Stop the Recognition.
+    function RecognizerStop(SDK, recognizer) {
+        // recognizer.AudioSource.Detach(audioNodeId) can be also used here. (audioNodeId is part of ListeningStartedEvent)
+        recognizer.AudioSource.TurnOff();
+    }
+
+    function UpdateRecognizedHypothesis(text, append) {
+        /*if (append) 
+            hypothesisDiv.innerHTML += text + " ";
+        else 
+            hypothesisDiv.innerHTML = text;*/
+        if(!leapOn) {
+        	moveHighlight(text);
+        }
+        /*var length = hypothesisDiv.innerHTML.length;
+        if (length > 403) {
+            hypothesisDiv.innerHTML = "..." + hypothesisDiv.innerHTML.substr(length-400, length);
+        }*/
+    }
+
+    function OnSpeechEndDetected() {
+        stopBtn.disabled = true;
+        leapOn = true;
+    }
+
+    function UpdateRecognizedPhrase(json) {
+        //hypothesisDiv.innerHTML = "";
+        //phraseDiv.innerHTML += json + "\n";
+        console.log(json);
+    }
+
+    function OnComplete() {
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+        leapOn = true;
+    }
+
+    var startBtn, stopBtn, leapOn = true;
+
+    function loadSDK() {
+    	startBtn = document.getElementById("startBtn");
+    	stopBtn = document.getElementById("stopBtn");
+    	Initialize(function (speechSdk) {
+	        SDK = speechSdk;
+	        startBtn.disabled = false;
+	        leapOn = true;
+	    });
+    }
+
+	/*
+	 *	LEAP MOTION GAME
+	 */
 	var imagePosMap = [];
 	var matrix = [];
 	var numMatrix = [];
@@ -49,6 +198,39 @@
 	  });*/
 
 	function init() {
+
+		var recognizer;
+		var recognitionMode = {value: "Dictation"};
+		var languageOptions = {value: "en-US"};
+
+	    function Setup() {
+	        recognizer = RecognizerSetup(SDK, recognitionMode.value, languageOptions.value, SDK.SpeechResultFormat["Simple"], key.value);
+	    }
+
+	    startBtn.addEventListener("click", function () {
+            if (key.value == "") {
+                alert("Please enter your Bing Speech subscription key!");
+                return;
+            } else {
+                if (!recognizer || previousSubscriptionKey != key.value) {
+                    previousSubscriptionKey = key.value;
+                    Setup();
+                }
+
+                RecognizerStart(SDK, recognizer);
+                startBtn.disabled = true;
+                leapOn = false;
+                stopBtn.disabled = false;
+            }                
+        });
+
+        stopBtn.addEventListener("click", function () {
+            RecognizerStop(SDK, recognizer);
+            startBtn.disabled = false;
+            leapOn = true;
+            stopBtn.disabled = true;
+        });
+
 	  var ctl = new Leap.Controller({enableGestures: true});
 	  
 	  var swiper = ctl.gesture('swipe');
@@ -89,15 +271,17 @@
 	  }, cooloff);
 
 	  swiper.update(function(g) {
-	  	var frame = ctl.frame();
-	    if (Math.abs(g.translation()[0]) > tolerance || Math.abs(g.translation()[1]) > tolerance) {
-	      var xDir = Math.abs(g.translation()[0]) > tolerance ? (g.translation()[0] > 0 ? -1 : 1) : 0;
-	      var yDir = Math.abs(g.translation()[1]) > tolerance ? (g.translation()[1] < 0 ? -1 : 1) : 0;
-	      if(frame.hands[0].type == "right")
-	      	slider(xDir, yDir, 0);
-	      else if(frame.hands[0].type == "left")
-	      	slider(xDir, yDir, 1);
-	    }
+	  	if(leapOn) {
+		  	var frame = ctl.frame();
+		    if (Math.abs(g.translation()[0]) > tolerance || Math.abs(g.translation()[1]) > tolerance) {
+		      var xDir = Math.abs(g.translation()[0]) > tolerance ? (g.translation()[0] > 0 ? -1 : 1) : 0;
+		      var yDir = Math.abs(g.translation()[1]) > tolerance ? (g.translation()[1] < 0 ? -1 : 1) : 0;
+		      if(frame.hands[0].type == "right")
+		      	slider(xDir, yDir, 0);
+		      else if(frame.hands[0].type == "left")
+		      	slider(xDir, yDir, 1);
+		    }
+		}
 	  });
 
 	  ctl.connect();
@@ -109,6 +293,51 @@
 	 // for(var i = 0;i<paths.length;i++)
 	   // console.log(paths[i]);
 	}
+
+	var xDir, yDir;
+    var flag = false;
+
+	function moveHighlight(voice) {
+		var updateHighlight = function() {
+		    $('.grid div').removeClass('highlight');
+		    $('.grid #d'+x+"_"+y).addClass('highlight');
+		  }
+
+    	switch(voice) {
+    		case "on": flag = true; xDir = 0; yDir = 0; break;
+    		case "off": flag = false; xDir = 0; yDir = 0; break;
+    		case "up" : xDir = 0; yDir = -1; break;
+    		case "down" : xDir = 0; yDir = 1; break;
+    		case "left" : xDir = -1; yDir = 0; break;
+    		case "right" : xDir = 1; yDir = 0; break;
+    		case "top left" : xDir = -1; yDir = -1; break;
+    		case "top right" : xDir = 1; yDir = -1; break;
+    		case "bottom left" : xDir = -1; yDir = 1; break;
+    		case "bottom right" : xDir = 1; yDir = 1; break;
+    		default: xDir = 0; yDir = 0;
+    	}
+    	prevX = x;
+	    prevY = y;
+
+	    if(flag) {
+	    	//MOVE BLOCK
+		    var temp = matrix[y][x];
+		    matrix[y][x] = matrix[(y+5+yDir)%5][(x+xDir+5)%5];
+		    matrix[(y+5+yDir)%5][(x+xDir+5)%5] = temp; 
+		    //console.log("prev");
+		    //console.log(matrix);
+		    temp = numMatrix[y][x];
+		    numMatrix[y][x] = numMatrix[(y+5+yDir)%5][(x+xDir+5)%5];
+		    numMatrix[(y+5+yDir)%5][(x+xDir+5)%5] = temp; 
+		}
+	    
+	    x += xDir;
+	    x = (x + 5) % 5;
+	    y += yDir;
+	    y = (y + 5) % 5;
+	    reRender();
+	    updateHighlight();
+    }
 
 	function pyCall(){
 	  paths = searchWord(matrix);
@@ -130,8 +359,10 @@
 	  $.getJSON($SCRIPT_ROOT + '/_check', {
 	        wordlist: JSON.stringify(params)
 	    }, function(data){
-	        console.log(data.result)
-	        //$( "#result" ).text(data.result);
+	        //console.log(data.result);
+	        if(data.result != 0)
+	        	score = parseInt(data.result);
+	        document.getElementById("insert").innerHTML = "Score: " + score;
 	    });
 	}
 

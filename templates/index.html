@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block body %}
-<body onload="init()">
+<body onload="loadSDK()">
   <div class="grid">
     <div id="d0_0"></div>
     <div id="d1_0"></div>
@@ -27,7 +27,11 @@
     <div id="d2_4"></div>
     <div id="d3_4"></div>
     <div id="d4_4"></div><br clear=both>
-    <p id="insert"></p>
   </div>
+  <td>
+    <button id="startBtn" disabled="disabled">Start</button>
+    <button id="stopBtn" disabled="disabled">Stop</button>
+  </td>
+  <p id="insert"></p>
 </body>
 {% endblock %}
