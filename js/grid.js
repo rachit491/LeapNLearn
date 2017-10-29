@@ -41,7 +41,34 @@ function init() {
 }
 
 function getWeight(char) {
-
+  switch(char) {
+    case 'E': return 120;
+    case 'T': return 90;
+    case 'A':
+    case 'I':
+    case 'N':
+    case 'O':
+    case 'S': return 80;
+    case 'H': return 64;
+    case 'R': return 62;
+    case 'D': return 44;
+    case 'L': return 40;
+    case 'U': return 34;
+    case 'C': 
+    case 'M': return 30;
+    case 'F': return 25;
+    case 'Y':
+    case 'W': return 20;
+    case 'G': 
+    case 'P': return 17;
+    case 'B': return 16;
+    case 'V': return 12;
+    case 'K': return 8;
+    case 'Q': return 5;
+    case 'J': 
+    case 'X': return 4;
+    case 'Z': return 2;
+  }
 }
 
 function createImageMap() {
@@ -60,18 +87,23 @@ function createImageMap() {
 
 function getRandomLetters() {
   //return Math.floor(Math.random() * 26);
+  var sumOfWeights = 0;
+  for(var i=0; i<26; i++) {
+    sumOfWeights += imagePosMap[i].weight;
+  }
   var randomWeight = Math.floor(Math.random() * sumOfWeights) + 1;
-  /*for each item in array
-  randomWeight = randomWeight - item.Weight 
-    if randomWeight <= 0
-      break // done, we select this item*/
+  for(var i=0; i<26; i++) {
+    randomWeight = randomWeight - imagePosMap[i].weight;
+      if(randomWeight <= 0)
+        return i;
+  }
 }
 
 function loadAssets() {
   var num;
   for(var i=0; i<5; i++) {
     for(var j=0; j<5; j++) {
-      num = Math.floor(Math.random() * 26);
+      num = getRandomLetters();
       var elm = document.getElementById("d"+i+"_"+j);
       elm.style.backgroundImage = "url('../assets/text.jpg')";
       elm.style.backgroundRepeat = "no-repeat";
