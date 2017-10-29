@@ -1,7 +1,7 @@
 <!doctype html>
 <title>LeapNLearn</title>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
-<script src="http://js.leapmotion.com/0.2.2/leap.min.js"></script>
+<script src="http://js.leapmotion.com/leap-0.6.3.min.js"></script>
 <style type="text/css">
 	.highlight {
 	  border: 5px red solid !important;
@@ -37,9 +37,20 @@
 	var wordSet = new Set();
 	var score = 0;
 
+	/*var controllerOptions = {};
+	  Leap.loop(controllerOptions, function (frame) {
+	  	console.log(frame.hands);
+	    if(frame.hands.length > 0) {
+	    	for(i=0; i<frame.hands.length; i++) {
+	    		var hand = frame.hands[i];
+	    		console.log(hand.type + " >>>>");
+	    	}
+	    }
+	  });*/
+
 	function init() {
 	  var ctl = new Leap.Controller({enableGestures: true});
-
+	  
 	  var swiper = ctl.gesture('swipe');
 
 	  var totalDistance = 0;
@@ -53,17 +64,20 @@
 	    $('.grid #d'+x+"_"+y).addClass('highlight');
 	  }
 
-	  var slider = _.debounce(function(xDir, yDir) {
+	  var slider = _.debounce(function(xDir, yDir, flag) {
 	    prevX = x;
 	    prevY = y;
-	    var temp = matrix[y][x];
-	    matrix[y][x] = matrix[(y+5+yDir)%5][(x+xDir+5)%5];
-	    matrix[(y+5+yDir)%5][(x+xDir+5)%5] = temp; 
-	    //console.log("prev");
-	    //console.log(matrix);
-	    temp = numMatrix[y][x];
-	    numMatrix[y][x] = numMatrix[(y+5+yDir)%5][(x+xDir+5)%5];
-	    numMatrix[(y+5+yDir)%5][(x+xDir+5)%5] = temp; 
+	    if(flag == 0) {
+	    	//MOVE BLOCK
+		    var temp = matrix[y][x];
+		    matrix[y][x] = matrix[(y+5+yDir)%5][(x+xDir+5)%5];
+		    matrix[(y+5+yDir)%5][(x+xDir+5)%5] = temp; 
+		    //console.log("prev");
+		    //console.log(matrix);
+		    temp = numMatrix[y][x];
+		    numMatrix[y][x] = numMatrix[(y+5+yDir)%5][(x+xDir+5)%5];
+		    numMatrix[(y+5+yDir)%5][(x+xDir+5)%5] = temp; 
+		}
 	    //console.log("next");
 	    //console.log(matrix);
 	    x += xDir;
@@ -75,10 +89,14 @@
 	  }, cooloff);
 
 	  swiper.update(function(g) {
+	  	var frame = ctl.frame();
 	    if (Math.abs(g.translation()[0]) > tolerance || Math.abs(g.translation()[1]) > tolerance) {
 	      var xDir = Math.abs(g.translation()[0]) > tolerance ? (g.translation()[0] > 0 ? -1 : 1) : 0;
 	      var yDir = Math.abs(g.translation()[1]) > tolerance ? (g.translation()[1] < 0 ? -1 : 1) : 0;
-	      slider(xDir, yDir);
+	      if(frame.hands[0].type == "right")
+	      	slider(xDir, yDir, 0);
+	      else if(frame.hands[0].type == "left")
+	      	slider(xDir, yDir, 1);
 	    }
 	  });
 
