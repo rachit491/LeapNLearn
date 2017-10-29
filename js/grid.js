@@ -1,4 +1,5 @@
 var imagePosMap = [];
+var matrix = [];
 
 function init() {
   var ctl = new Leap.Controller({enableGestures: true});
@@ -82,7 +83,7 @@ function createImageMap() {
       }
     }
   }
-  console.log(imagePosMap);
+  //console.log(imagePosMap);
 }
 
 function getRandomLetters() {
@@ -102,15 +103,17 @@ function getRandomLetters() {
 function loadAssets() {
   var num;
   for(var i=0; i<5; i++) {
+    matrix[i] = [];
     for(var j=0; j<5; j++) {
       num = getRandomLetters();
-      var elm = document.getElementById("d"+i+"_"+j);
+      var elm = document.getElementById("d"+j+"_"+i);
       elm.style.backgroundImage = "url('../assets/text.jpg')";
       elm.style.backgroundRepeat = "no-repeat";
       elm.style.backgroundPositionX = imagePosMap[num].x + "px";//"-20px";     //-140px to move left
       elm.style.backgroundPositionY = imagePosMap[num].y + "px";//"-14px";     //-115px to move down
       elm.style.backgroundSize = "707%";
       elm.setAttribute("data-value", imagePosMap[num].value);
+      matrix[i].push(imagePosMap[num].value);
     }
   }
 }
