@@ -5,7 +5,7 @@ var prevX = 2;
 var prevY = 2;
 var x = 2, y = 2;
 var paths;
-
+var wordSet = new Set();
 function init() {
   var ctl = new Leap.Controller({enableGestures: true});
 
@@ -56,21 +56,22 @@ function init() {
 
   createImageMap();
   loadAssets();
-  paths = searchWord(matrix);
+  pyCall();
  // for(var i = 0;i<paths.length;i++)
    // console.log(paths[i]);
 }
 
-/*function reRender(){
-  var elm = document.getElementById("d"+x+"_"+y);
-  var elm1 = document.getElementById("d"+prevX+"_"+prevY);
-  elm.style.backgroundPositionX = imagePosMap[numMatrix[y][x]].x + "px";//"-20px";     //-140px to move left
-  elm.style.backgroundPositionY = imagePosMap[numMatrix[y][x]].y + "px";//"-14px";     //-115px to move down
-  elm1.style.backgroundPositionX = imagePosMap[numMatrix[prevY][prevX]].x + "px";//"-20px";     //-140px to move left
-  elm1.style.backgroundPositionY = imagePosMap[numMatrix[prevY][prevX]].y + "px";//"-14px";     //-115px to move down
-  elm1.setAttribute("data-value", imagePosMap[numMatrix[prevY][prevX]].value);
-  elm.setAttribute("data-value", imagePosMap[numMatrix[y][x]].value);
- }*/
+function pyCall(){
+  paths = searchWord(matrix);
+  var params = new Array();
+   for(i=0;i<paths.length;i++){
+    if(!wordSet.has(paths[i]))
+      params.add(paths[i]);
+    wordSet.add(paths[i]);
+  }
+  var json_string = JSON.stringify(params);
+}
+
 
 function reRender() {
   for(var i=0; i<5; i++) {
@@ -87,7 +88,7 @@ function reRender() {
       //numMatrix[i].push(num);
     }
   }
-  paths = searchWord(matrix);
+  pyCall();
 }
 
 function getWeight(char) {
