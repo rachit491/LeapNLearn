@@ -1,7 +1,7 @@
 function searchWord(matrix) {
     var rows = new Array();
     for(var i=0;i<5;i++){
-        rows.push(matrix[i].join());
+        rows.push(matrix[i].join(""));
     }
     var cols = new Array();
     for(var i=0;i<5;i++){
@@ -12,7 +12,7 @@ function searchWord(matrix) {
     } 
     var columns = new Array();
     for(var i=0;i<5;i++){
-        columns.push(matrix[i].join());
+        columns.push(matrix[i].join(""));
     }
 
     var paths = new Array();
