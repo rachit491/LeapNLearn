@@ -4,6 +4,8 @@ var numMatrix = [];
 var prevX = 2;
 var prevY = 2;
 var x = 2, y = 2;
+var paths;
+
 function init() {
   var ctl = new Leap.Controller({enableGestures: true});
 
@@ -21,6 +23,18 @@ function init() {
   }
 
   var slider = _.debounce(function(xDir, yDir) {
+    prevX = x;
+    prevY = y;
+    var temp = matrix[y][x];
+    matrix[y][x] = matrix[(y+5+yDir)%5][(x+xDir+5)%5];
+    matrix[(y+5+yDir)%5][(x+xDir+5)%5] = temp; 
+    //console.log("prev");
+    //console.log(matrix);
+    temp = numMatrix[y][x];
+    numMatrix[y][x] = numMatrix[(y+5+yDir)%5][(x+xDir+5)%5];
+    numMatrix[(y+5+yDir)%5][(x+xDir+5)%5] = temp; 
+    //console.log("next");
+    //console.log(matrix);
     x += xDir;
     x = (x + 5) % 5;
     y += yDir;
@@ -33,17 +47,6 @@ function init() {
     if (Math.abs(g.translation()[0]) > tolerance || Math.abs(g.translation()[1]) > tolerance) {
       var xDir = Math.abs(g.translation()[0]) > tolerance ? (g.translation()[0] > 0 ? -1 : 1) : 0;
       var yDir = Math.abs(g.translation()[1]) > tolerance ? (g.translation()[1] < 0 ? -1 : 1) : 0;
-     
-      prevX = x;
-      prevY = y;
-      var temp = matrix[y][x];
-      matrix[y][x] = matrix[(y+5+yDir)%5][(x+xDir+5)%5];
-      matrix[(y+5+yDir)%5][(x+xDir+5)%5] = temp; 
-      console.log("prev" +numMatrix);
-      temp = numMatrix[y][x];
-      numMatrix[y][x] = numMatrix[(y+5+yDir)%5][(x+xDir+5)%5];
-      numMatrix[(y+5+yDir)%5][(x+xDir+5)%5] = temp; 
-      console.log("next"+numMatrix);
       slider(xDir, yDir);
     }
   });
@@ -53,12 +56,12 @@ function init() {
 
   createImageMap();
   loadAssets();
-  var paths = searchWord(matrix);
+  paths = searchWord(matrix);
  // for(var i = 0;i<paths.length;i++)
    // console.log(paths[i]);
 }
 
-function reRender(){
+/*function reRender(){
   var elm = document.getElementById("d"+x+"_"+y);
   var elm1 = document.getElementById("d"+prevX+"_"+prevY);
   elm.style.backgroundPositionX = imagePosMap[numMatrix[y][x]].x + "px";//"-20px";     //-140px to move left
@@ -67,7 +70,25 @@ function reRender(){
   elm1.style.backgroundPositionY = imagePosMap[numMatrix[prevY][prevX]].y + "px";//"-14px";     //-115px to move down
   elm1.setAttribute("data-value", imagePosMap[numMatrix[prevY][prevX]].value);
   elm.setAttribute("data-value", imagePosMap[numMatrix[y][x]].value);
- }
+ }*/
+
+function reRender() {
+  for(var i=0; i<5; i++) {
+    for(var j=0; j<5; j++) {
+      num = numMatrix[i][j];
+      var elm = document.getElementById("d"+j+"_"+i);
+      elm.style.backgroundImage = "url('../assets/text-gray.jpg')";
+      elm.style.backgroundRepeat = "no-repeat";
+      elm.style.backgroundPositionX = imagePosMap[num].x + "px";//"-20px";     //-140px to move left
+      elm.style.backgroundPositionY = imagePosMap[num].y + "px";//"-14px";     //-115px to move down
+      elm.style.backgroundSize = "707%";
+      elm.setAttribute("data-value", imagePosMap[num].value);
+      //matrix[i].push(imagePosMap[num].value);
+      //numMatrix[i].push(num);
+    }
+  }
+  paths = searchWord(matrix);
+}
 
 function getWeight(char) {
   switch(char) {
