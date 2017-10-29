@@ -197,3 +197,7 @@ function togglePause() {
     document.getElementById("pause").innerText = "Pause";
   }
 }
+
+function addBlocks(){
+  
+}
